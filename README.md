@@ -2,7 +2,7 @@
 
 #### Section 02:
 
-In this section you need to develop a plugin which create a custom widget in the back-end. This widget disply the featured posts in the front-sidebar. The post information are available in the API provided. API documentation can be found in the next page. 
+In this section you need to develop a plugin which create a custom widget in the back-end. This widget display the featured posts in the front-sidebar. The post information are available in the API provided. API documentation can be found in the next page. 
 
 1. The user should be able to control the following settings from the backend.
     1. No of posts showing in the front-end.
