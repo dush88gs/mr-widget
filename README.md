@@ -11,6 +11,8 @@ In this section you need to develop a plugin which create a custom widget in the
 
 2. The title and message should be formated as shown below.
 
+![Widget Format](widget-format.jpg)
+
 ### Messages API Documentation
 
 This API returns a collection of messages in json format. This API call will return 100 messages.
