@@ -142,38 +142,38 @@ class MrWidget extends WP_Widget {
 
         if( false != $data && isset($data->f_posts)) {
             echo $before_widget;
-            echo $before_title;
-                echo $title;
-            echo $after_title;
-            // echo "<pre>";
-            //     print_r($data); die();
-            // echo "</pre>";
-
-            $word_count = $data->word_count;
-            $f_posts = $data->f_posts;
-
-            echo $word_count;
-            
-            // echo "<pre>";
-            //     print_r($f_posts );
-            // echo "</pre>";
-        
-            foreach( $f_posts as $f_post ) {
+                echo $before_title;
+                    echo $title;
+                echo $after_title;
                 // echo "<pre>";
-                // print_r($f_post);
+                //     print_r($data); die();
                 // echo "</pre>";
-                $trimmed_post = wp_trim_words( $f_post->body, $word_count, '...' );
 
-                echo "<h6>" . $f_post->id . ". " . $f_post->title ."</h6>";
-                echo "<p>" . $trimmed_post . "</p>";
-            } 
-        echo $after_widget;
+                $word_count = $data->word_count;
+                $f_posts = $data->f_posts;
+
+                // echo $word_count;
+                
+                // echo "<pre>";
+                //     print_r($f_posts );
+                // echo "</pre>";
+            
+                foreach( $f_posts as $f_post ) {
+                    // echo "<pre>";
+                    // print_r($f_post);
+                    // echo "</pre>";
+                    $trimmed_post = wp_trim_words( $f_post->body, $word_count, '...' );
+
+                    echo "<h6>" . $f_post->id . ". " . $f_post->title ."</h6>";
+                    echo "<p>" . $trimmed_post . "</p>";
+                } 
+            echo $after_widget;
         }
     }
 
     private function featured_posts($post_count, $word_count) {
         $f_posts = get_transient('featured_posts_widget');
-        if( !$f_posts ) {
+        if( !$f_posts || $f_posts->post_count !== $post_count || $f_posts->word_count !== $word_count ) {
             return $this->fetch_featured_posts($post_count, $word_count);
         }
         return $f_posts;
@@ -187,9 +187,7 @@ class MrWidget extends WP_Widget {
         $f_posts = json_decode($f_posts['body']);
 
         // if there is a problem with the API
-        if( isset($f_posts->error) ) {
-            return false;
-        }
+        //  
 
         $data = new stdClass();
         $data->post_count = $post_count;
@@ -198,6 +196,9 @@ class MrWidget extends WP_Widget {
     
         foreach ($f_posts as $f_post) {
             if ( $post_count-- === 0 ) break;
+            // echo "<pre>";
+            // print_r($f_post);
+            // echo "</pre>";
             $data->f_posts[] = $f_post;
         }
 
@@ -205,7 +206,7 @@ class MrWidget extends WP_Widget {
         //     print_r($data); die();
         // echo "</pre>";
 
-        set_transient('featured_posts_widget', $data, 60*1);
+        set_transient('featured_posts_widget', $data, 60*5);
         return $data;
 
     }
