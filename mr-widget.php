@@ -113,12 +113,12 @@ class MrWidget extends WP_Widget {
 
         <p class="mr-input-number">
             <label for="<?php echo $this->get_field_id( 'post_count'); ?>">No. of messages</label>
-            <input class="widefat" type="number" id="<?php echo $this->get_field_id( 'post_count' ); ?>" name="<?php echo $this->get_field_name( 'post_count' ); ?>" min="1" max="10" value="<?php echo !empty($post_count) ? $post_count : 3; ?>" />
+            <input class="widefat" type="number" id="<?php echo $this->get_field_id( 'post_count' ); ?>" name="<?php echo $this->get_field_name( 'post_count' ); ?>" value="<?php echo !empty($post_count) ? $post_count : 3; ?>" />
         </p>
 
         <p class="mr-input-number">
             <label for="<?php echo $this->get_field_id( 'word_count'); ?>">No. of word in message body</label>
-            <input class="widefat" type="number" id="<?php echo $this->get_field_id( 'word_count' ); ?>" name="<?php echo $this->get_field_name( 'word_count' ); ?>" min="10" max="40" value="<?php echo !empty($word_count) ? $word_count : 15; ?>" />
+            <input class="widefat" type="number" id="<?php echo $this->get_field_id( 'word_count' ); ?>" name="<?php echo $this->get_field_name( 'word_count' ); ?>" value="<?php echo !empty($word_count) ? $word_count : 15; ?>" />
         </p>
 
         <?php
@@ -140,21 +140,74 @@ class MrWidget extends WP_Widget {
 
         $data = $this->featured_posts($post_count, $word_count);
 
-        echo $before_widget;
-            echo $before_title . $title . $after_title;
-            echo "<p>" . $description . "</p>";
+        if( false != $data && isset($data->f_posts)) {
+            echo $before_widget;
+            echo $before_title;
+                echo $title;
+            echo $after_title;
+            // echo "<pre>";
+            //     print_r($data); die();
+            // echo "</pre>";
+
+            $word_count = $data->word_count;
+            $f_posts = $data->f_posts;
+
+            echo $word_count;
+            
+            // echo "<pre>";
+            //     print_r($f_posts );
+            // echo "</pre>";
+        
+            foreach( $f_posts as $f_post ) {
+                // echo "<pre>";
+                // print_r($f_post);
+                // echo "</pre>";
+                $trimmed_post = wp_trim_words( $f_post->body, $word_count, '...' );
+
+                echo "<h6>" . $f_post->id . ". " . $f_post->title ."</h6>";
+                echo "<p>" . $trimmed_post . "</p>";
+            } 
         echo $after_widget;
+        }
     }
 
     private function featured_posts($post_count, $word_count) {
-      $this->fetch_featured_posts($post_count, $word_count);
+        $f_posts = get_transient('featured_posts_widget');
+        if( !$f_posts ) {
+            return $this->fetch_featured_posts($post_count, $word_count);
+        }
+        return $f_posts;
     }
 
     private function fetch_featured_posts($post_count, $word_count) {
-      $f_posts = wp_remote_get("http://jsonplaceholder.typicode.com/posts");
-      echo "<pre>";
-        print_r($f_posts['body']);
-      echo "</pre>";
+        $f_posts = wp_remote_get("http://jsonplaceholder.typicode.com/posts");
+        // echo "<pre>";
+        //   print_r(json_decode($f_posts['body']));
+        // echo "</pre>";
+        $f_posts = json_decode($f_posts['body']);
+
+        // if there is a problem with the API
+        if( isset($f_posts->error) ) {
+            return false;
+        }
+
+        $data = new stdClass();
+        $data->post_count = $post_count;
+        $data->word_count = $word_count;
+        $data->f_posts = array();
+    
+        foreach ($f_posts as $f_post) {
+            if ( $post_count-- === 0 ) break;
+            $data->f_posts[] = $f_post;
+        }
+
+        // echo "<pre>";
+        //     print_r($data); die();
+        // echo "</pre>";
+
+        set_transient('featured_posts_widget', $data, 60*1);
+        return $data;
+
     }
 
 }
