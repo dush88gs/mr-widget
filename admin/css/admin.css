@@ -1,0 +1,6 @@
+.mr-input-number label {
+  display: block;
+}
+.mr-input-number input[type=number] {
+  width: 100px;
+}
